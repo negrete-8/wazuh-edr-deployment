@@ -1,0 +1,41 @@
+<!--
+  Wazuh Active Response configuration
+  Location: /var/ossec/etc/ossec.conf on the Wazuh Manager
+
+  Block 1: Automatic SSH brute-force IP block
+  Block 2: Manual host isolation (custom command, see scripts/isolate-host.sh on the agent)
+-->
+
+<ossec_config>
+
+  <!--
+    Scenario 1 — SSH brute-force auto-block
+    Triggers on rule 5712 (SSHD brute force attack)
+    Blocks the source IP via iptables for 600 seconds
+  -->
+  <active-response>
+    <command>firewall-drop</command>
+    <location>local</location>
+    <rules_id>5712</rules_id>
+    <timeout>600</timeout>
+  </active-response>
+
+  <!--
+    Scenario 2 — Host isolation
+    Custom command defined separately (see commands.xml or shared agent script).
+    Invoked manually from the dashboard on a specific agent.
+  -->
+  <command>
+    <name>isolate-host</name>
+    <executable>isolate-host.sh</executable>
+    <expect>srcip</expect>
+    <timeout_allowed>no</timeout_allowed>
+  </command>
+
+  <active-response>
+    <command>isolate-host</command>
+    <location>local</location>
+    <!-- No rules_id: invoked manually -->
+  </active-response>
+
+</ossec_config>
